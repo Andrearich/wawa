@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上岸蛙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f8ff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            z-index: 1;
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.75);
+        }
+        
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 0 20px;
+        }
+        
+        .frog-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+        }
+        
+        .frog-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .click-prompt {
+            position: absolute;
+            top: -30px;
+            right: -20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .message-bubble {
+            position: absolute;
+            top: 20%;
+            right: 10%;
+            background-color: white;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 70%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 10;
+        }
+        
+        .message-text {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            z-index: 1;
+        }
+        
+        .button {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #4CAF50;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-height: 80%;
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .selector-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .bg-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .selector-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .selector-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .selector-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .selector-text {
+            font-size: 14px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .close-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 0;
+            border-radius: 25px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <img id="background" class="background" src="" alt="背景">
+    
+    <div class="header">
+        <h1 class="title">上岸蛙</h1>
+    </div>
+    
+    <div class="content">
+        <div id="frogContainer" class="frog-container">
+            <img id="frogImage" class="frog-image" src="" alt="蛙蛙">
+            <div id="clickPrompt" class="click-prompt">点我</div>
+        </div>
+        
+        <div id="messageBubble" class="message-bubble">
+            <p id="messageText" class="message-text"></p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <button id="changeFrogBtn" class="button">更换蛙蛙</button>
+        <button id="changeBackgroundBtn" class="button">更换背景</button>
+    </div>
+    
+    <!-- Frog Selector Modal -->
+    <div id="frogSelectorModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">选择蛙蛙</h2>
+            <div id="frogGrid" class="selector-grid">
+                <!-- Frog items will be added here dynamically -->
+            </div>
+            <button id="closeFrogModalBtn" class="close-button">关闭</button>
+        </div>
+    </div>
+    
+    <!-- Background Selector Modal -->
+    <div id="backgroundSelectorModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">选择背景</h2>
+            <div id="backgroundGrid" class="bg-selector-grid">
+                <!-- Background items will be added here dynamically -->
+            </div>
+            <button id="closeBackgroundModalBtn" class="close-button">关闭</button>
+        </div>
+    </div>
+    
+    <script>
+        // Data
+        const frogCharacters = [
+            { id: 1, image: '1.png', name: '蛙蛙一号' },
+            { id: 2, image: '2.png', name: '蛙蛙二号' },
+            { id: 3, image: '3.png', name: '蛙蛙三号' },
+            { id: 4, image: '4.png', name: '蛙蛙四号' },
+            { id: 5, image: '5.png', name: '蛙蛙五号' },
+            { id: 6, image: '6.png', name: '蛙蛙六号' },
+            { id: 7, image: '7.png', name: '蛙蛙七号' },
+            { id: 8, image: '8.png', name: '蛙蛙八号' },
+            { id: 9, image: '9.png', name: '蛙蛙九号' },
+            { id: 10, image: '10.png', name: '蛙蛙十号' },
+            { id: 11, image: '11.png', name: '蛙蛙十一号' },
+            { id: 12, image: '12.png', name: '蛙蛙十二号' }
+        ];
+        
+        const backgrounds = [
+            { id: 1, image: 'beijing1.png', name: '背景一' },
+            { id: 2, image: 'beijing2.png', name: '背景二' },
+            { id: 3, image: 'beijing3.png', name: '背景三' },
+            { id: 4, image: 'beijing4.png', name: '背景四' },
+            { id: 5, image: 'beijing5.png', name: '背景五' },
+            { id: 6, image: 'beijing6.png', name: '背景六' },
+            { id: 7, image: 'beijing7.png', name: '背景七' },
+            { id: 8, image: 'beijing8.png', name: '背景八' }
+        ];
+        
+        const messages = [
+            "🌅 \"你熬过的夜、刷过的题、走过的路，终将铺成一条星光大道，载你抵达理想的彼岸。\"",
+            "💡 \"每一次提笔，都是向'上岸'更近一步；每一次坚持，都是对'放弃'最有力的回击。\"",
+            "🌱 \"备考如登山，半山腰总是拥挤的，但山顶的风景，只属于咬牙登顶的人。\"",
+            "🌟 \"不必焦虑别人比你快，公考不是冲刺赛，而是一场找准节奏的马拉松。\"",
+            "⏳ \"你背不下来的书，总有人能背下来；你写不完的题，总有人能写完。所以，你想去的岗位，也会有人替你到达——除非你咬牙扛住这一刻。\"",
+            "🔥 \"累了就想想：那些你早起的清晨、晚睡的深夜，终会化作考场上从容落笔的底气。\"",
+            "🚀 \"考公不是单选题，但'放弃'永远是错误答案。\"",
+            "🌊 \"岸上灯火可期，何必困于眼前风浪？沉下心，稳住桨，终会抵达。\"",
+            "📚 \"备考没有'速成'，只有厚积薄发。今天刷的每道题，都是未来试卷上笃定的答案。\"",
+            "🌳 \"种一棵树最好的时间是十年前，其次是现在。上岸最好的时机，就是此刻提笔的你。\"",
+            "🏙️ \"你考的不是一个岗位，而是一份'为人民服务'的初心，和改变未来的可能。\"",
+            "✨ \"若你向往星辰大海，就别让书桌前的方寸之地，困住你的鸿鹄之志。\"",
+            "🎯 \"最后一个月，是'量变到质变'的爆发期，稳住！错的每一题，都是为了考场上不错。\"",
+            "⏰ \"倒计时不是'终点临近'，而是'胜利在望'！\"",
+            "✍️ \"晨光不负赶路人，夜色不欺奋斗者。\"",
+            "✍️ \"笔锋所至，心之所向；合笔如鞘，功不唐捐。\"",
+            "✍️ \"你考的不是试，是前途和父母暮年的欢喜。\"",
+            "✍️ \"乾坤未定，你我皆是黑马；若乾坤已定，便扭转乾坤！\"",
+            "🌠 \"总有一天，你会笑着说出那些曾让你哭的备考日子。而那一天，就叫'上岸'。\"",
+            "❤️ \"愿你在考场上合笔的那一刻，有战士收刀入鞘的骄傲，也有春风拂面的释然。岸上见！\"",
+            "🌠 \"你刷过的题，会铺成脚下的路；你流过的汗，会凝成上岸的帆。\"",
+            "⏳ \"备考的每一天，都是与'放弃'的博弈，而你已赢了99%的对手。\"",
+            "💪 \"你远比自己想象的强大——能走到今天的你，本就是奇迹。\"",
+            "✨ \"别怕错题如潮，潮水退去时，留下的都是珍珠般的经验。\"",
+            "⏰ \"时间从不偏袒任何人，但会奖励那些拼命追赶它的人。\"",
+            "📖 \"凌晨五点的书页和深夜的台灯，终将见证你破晓时的光芒。\"",
+            "🚶 \"独行的日子，是在为千万人服务的路上积蓄力量。\"",
+            "🌌 \"寂寞是强者的修炼场，孤独是上岸的通行证。\"",
+            "🌱 \"分数波动不是失败，而是提醒你：下一站，蜕变。\"",
+            "🌈 \"乌云终会散，你错过的题，都会在考场上还你一个晴天。\"",
+            "🔥 \"若你生而非骏马，便做那匹后来居上的黑马！\"",
+            "⚡ \"乾坤未定，当下的每一秒，都是改写结局的机会。\"",
+            "💤 \"允许自己休息，但别允许自己放弃。\"",
+            "🌙 \"今天的疲惫，是明天的勋章；此刻的坚持，是未来的底气。\"",
+            "🎯 \"有人质疑你考公，但没人能质疑你上岸后的未来。\"",
+            "🏔️ \"山顶的风景，从不向山脚下的人解释。\"",
+            "🚀 \"最后30天，不是终点，而是爆发潜能的起点！\"",
+            "💥 \"'来不及'是弱者的借口，'拼一把'是强者的选择。\"",
+            "🇨🇳 \"你考的不只是编制，更是守护一方百姓的责任。\"",
+            "❤️ \"父母的白发，家乡的期待，都值得你背水一战。\"",
+            "✍️ \"笔尖写碎星辰，试卷铺就青云。\"",
+            "✍️ \"我若不动，风奈我何？我若狂奔，风亦追随！\"",
+            "✍️ \"宁可题海沉浮，绝不考后痛哭！\"",
+            "✍️ \"考场即战场，笔作刀剑，心为铠甲。\"",
+            "🏆 \"总有一天，你会站在岸上，对曾经的自己说：值得。\"",
+            "🌸 \"上岸不是终点，而是带着使命，奔赴下一场山海。\"",
+            "🌏 \"世界不会辜负每一份努力，正如春风不会遗忘每一粒种子。\"",
+            "🌟 \"待你上岸时，回望来路，轻舟已过万重山。\""
+        ];
+        
+        // DOM Elements
+        const backgroundEl = document.getElementById('background');
+        const frogImageEl = document.getElementById('frogImage');
+        const clickPromptEl = document.getElementById('clickPrompt');
+        const messageBubbleEl = document.getElementById('messageBubble');
+        const messageTextEl = document.getElementById('messageText');
+        const changeFrogBtn = document.getElementById('changeFrogBtn');
+        const changeBackgroundBtn = document.getElementById('changeBackgroundBtn');
+        const frogSelectorModal = document.getElementById('frogSelectorModal');
+        const backgroundSelectorModal = document.getElementById('backgroundSelectorModal');
+        const closeFrogModalBtn = document.getElementById('closeFrogModalBtn');
+        const closeBackgroundModalBtn = document.getElementById('closeBackgroundModalBtn');
+        const frogGrid = document.getElementById('frogGrid');
+        const backgroundGrid = document.getElementById('backgroundGrid');
+        
+        // State
+        let selectedFrog = frogCharacters[0];
+        let selectedBackground = backgrounds[0];
+        let messageTimeout;
+        
+        // Initialize
+        function init() {
+            // Load saved preferences
+            const savedFrogId = localStorage.getItem('selectedFrogId');
+            const savedBackgroundId = localStorage.getItem('selectedBackgroundId');
+            
+            if (savedFrogId) {
+                const frog = frogCharacters.find(f => f.id === parseInt(savedFrogId));
+                if (frog) selectedFrog = frog;
+            }
+            
+            if (savedBackgroundId) {
+                const bg = backgrounds.find(b => b.id === parseInt(savedBackgroundId));
+                if (bg) selectedBackground = bg;
+            }
+            
+            // Set initial images
+            updateDisplay();
+            
+            // Create frog selector items
+            frogCharacters.forEach(frog => {
+                const item = createSelectorItem(frog, 'frog');
+                frogGrid.appendChild(item);
+            });
+            
+            // Create background selector items
+            backgrounds.forEach(bg => {
+                const item = createSelectorItem(bg, 'background');
+                backgroundGrid.appendChild(item);
+            });
+            
+            // Add event listeners
+            frogContainer.addEventListener('click', handleFrogClick);
+            changeFrogBtn.addEventListener('click', () => frogSelectorModal.style.display = 'flex');
+            changeBackgroundBtn.addEventListener('click', () => backgroundSelectorModal.style.display = 'flex');
+            closeFrogModalBtn.addEventListener('click', () => frogSelectorModal.style.display = 'none');
+            closeBackgroundModalBtn.addEventListener('click', () => backgroundSelectorModal.style.display = 'none');
+        }
+        
+        // Update display
+        function updateDisplay() {
+            // Set image paths relative to assets folder
+            const assetPath = 'assets/';
+            backgroundEl.src = assetPath + selectedBackground.image;
+            frogImageEl.src = assetPath + selectedFrog.image;
+        }
+        
+        // Create selector item
+        function createSelectorItem(item, type) {
+            const div = document.createElement('div');
+            div.className = 'selector-item';
+            
+            const img = document.createElement('img');
+            img.className = 'selector-image';
+            img.src = 'assets/' + item.image;
+            img.alt = item.name;
+            
+            const text = document.createElement('span');
+            text.className = 'selector-text';
+            text.textContent = item.name;
+            
+            div.appendChild(img);
+            div.appendChild(text);
+            
+            div.addEventListener('click', () => {
+                if (type === 'frog') {
+                    selectedFrog = item;
+                    localStorage.setItem('selectedFrogId', item.id);
+                    frogSelectorModal.style.display = 'none';
+                } else {
+                    selectedBackground = item;
+                    localStorage.setItem('selectedBackgroundId', item.id);
+                    backgroundSelectorModal.style.display = 'none';
+                }
+                
+                updateDisplay();
+            });
+            
+            return div;
+        }
+        
+        // Handle frog click
+        function handleFrogClick() {
+            // Hide click prompt
+            clickPromptEl.style.display = 'none';
+            
+            // Get random message
+            const randomIndex = Math.floor(Math.random() * messages.length);
+            messageTextEl.textContent = messages[randomIndex];
+            
+            // Show message
+            messageBubbleEl.style.display = 'block';
+            
+            // Clear previous timeout if exists
+            if (messageTimeout) clearTimeout(messageTimeout);
+            
+            // Hide message after 5 seconds
+            messageTimeout = setTimeout(() => {
+                messageBubbleEl.style.display = 'none';
+                
+                // Show click prompt again after 1 second
+                setTimeout(() => {
+                    clickPromptEl.style.display = 'block';
+                }, 1000);
+            }, 5000);
+        }
+        
+        // Initialize the app
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html> 
