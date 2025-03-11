@@ -10,6 +10,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Microsoft YaHei', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* 移除点击时的蓝色框框 */
         }
         
         body {
@@ -18,10 +19,12 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: fixed; /* 防止页面滚动 */
+            width: 100%;
         }
         
         .background {
-            position: absolute;
+            position: fixed;
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -32,6 +35,7 @@
             text-align: center;
             padding: 20px 0;
             z-index: 1;
+            position: relative;
         }
         
         .title {
@@ -49,6 +53,7 @@
             align-items: center;
             position: relative;
             padding: 0 20px;
+            min-height: 60vh; /* 确保内容区域有足够的高度 */
         }
         
         .frog-container {
@@ -56,12 +61,15 @@
             width: 150px;
             height: 150px;
             cursor: pointer;
+            user-select: none; /* 防止长按选中 */
+            -webkit-user-select: none;
         }
         
         .frog-image {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            pointer-events: none; /* 防止图片被单独选中 */
         }
         
         .click-prompt {
@@ -74,16 +82,19 @@
             border-radius: 20px;
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            pointer-events: none; /* 防止提示文字被点击 */
         }
         
         .message-bubble {
-            position: absolute;
+            position: fixed; /* 改为固定定位 */
             top: 20%;
-            right: 10%;
+            left: 50%;
+            transform: translateX(-50%); /* 水平居中 */
             background-color: white;
             padding: 15px;
             border-radius: 15px;
-            max-width: 70%;
+            width: 85%; /* 控制宽度 */
+            max-width: 500px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             display: none;
             z-index: 10;
@@ -93,6 +104,7 @@
             font-size: 16px;
             color: #333;
             line-height: 1.5;
+            text-align: center;
         }
         
         .footer {
@@ -100,6 +112,11 @@
             justify-content: space-around;
             padding: 20px;
             z-index: 1;
+            position: fixed; /* 固定在底部 */
+            bottom: 20px; /* 距离底部20px */
+            left: 0;
+            right: 0;
+            pointer-events: none; /* 先禁用整个footer的点击 */
         }
         
         .button {
@@ -111,6 +128,9 @@
             border: none;
             cursor: pointer;
             box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+            pointer-events: auto; /* 重新启用按钮的点击 */
+            min-width: 120px; /* 确保按钮有最小宽度 */
+            margin: 0 10px; /* 按钮之间的间距 */
         }
         
         .modal {
@@ -133,6 +153,7 @@
             border-radius: 15px;
             padding: 20px;
             overflow-y: auto;
+            margin: 20px;
         }
         
         .modal-title {
@@ -195,6 +216,29 @@
             cursor: pointer;
             width: 100%;
             margin-top: 15px;
+        }
+
+        /* 适配小屏幕设备 */
+        @media screen and (max-height: 600px) {
+            .header {
+                padding: 10px 0;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .content {
+                min-height: 50vh;
+            }
+            
+            .footer {
+                bottom: 10px;
+            }
+            
+            .button {
+                padding: 10px 20px;
+            }
         }
     </style>
 </head>
